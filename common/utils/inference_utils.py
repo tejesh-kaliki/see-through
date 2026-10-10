@@ -28,8 +28,11 @@ VALID_BODY_PARTS_V2 = [
 layerdiff_pipeline: KDiffusionStableDiffusionXLPipeline = None
 def apply_layerdiff(
     imgp: str, pretrained: str, num_inference_steps=30, seed=0, save_dir='workspace/layerdiff_output', target_tag_list=VALID_BODY_PARTS_V2, 
-    resolution=1280, vae_ckpt=None, unet_ckpt=None, disable_progressbar=False, cache_tag_embeds=True, group_offload=False):
-    
+    resolution=1280, vae_ckpt=None, unet_ckpt=None, disable_progressbar=False, cache_tag_embeds=True, group_offload=False,
+    head_pad=0.2):
+    # head_pad: context around the head crop as a fraction of the head box. The head pass only sees this crop, so a hat
+    # (cone above, brim to the sides) outside the 'head' layer's box is cut off and never decomposed.
+
     global layerdiff_pipeline
     if layerdiff_pipeline is None:
         trans_vae = TransparentVAE.from_pretrained(pretrained, subfolder='trans_vae')
@@ -111,11 +114,11 @@ def apply_layerdiff(
             x2 = x + w
             y2 = y + h
             if w < iw // 2:
-                px = min(iw - x - w, x, w // 5)
+                px = min(iw - x - w, x, int(w * head_pad))
                 x1 = min(max(x - px, 0), iw)
                 x2 = min(max(x + w + px, 0), iw)
             if h < ih // 2:
-                py = min(ih - y - h, y, h // 5)
+                py = min(ih - y - h, y, int(h * head_pad))
                 y2 = min(max(y + h + py, 0), ih)
                 y1 = min(max(y - py, 0), ih)
 

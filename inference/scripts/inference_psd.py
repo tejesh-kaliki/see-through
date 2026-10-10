@@ -35,6 +35,7 @@ if __name__ == '__main__':
     parser.add_argument('--tblr_split', action='store_true', help='try split parts (handwear, eyes, etc) into left-right components')
     parser.add_argument('--disable_progressbar', action='store_true', help='hide progressbar')
     parser.add_argument('--group_offload', action='store_true')
+    parser.add_argument('--head_pad', type=float, default=0.2, help='context around the head crop (fraction of the head box); raise for hats / large headwear')
     args = parser.parse_args()
     srcp = args.srcp
 
@@ -49,7 +50,7 @@ if __name__ == '__main__':
 
         print('running layerdiff...')
         apply_layerdiff(srcp, args.repo_id_layerdiff, save_dir=args.save_dir, seed=args.seed, vae_ckpt=args.vae_ckpt, unet_ckpt=args.unet_ckpt, \
-            resolution=args.resolution, disable_progressbar=args.disable_progressbar, num_inference_steps=args.inference_steps, group_offload=args.group_offload)
+            resolution=args.resolution, disable_progressbar=args.disable_progressbar, num_inference_steps=args.inference_steps, group_offload=args.group_offload, head_pad=args.head_pad)
 
         print('running marigold...')
         apply_marigold(srcp, args.repo_id_depth, save_dir=args.save_dir, seed=args.seed, disable_progressbar=args.disable_progressbar, \
